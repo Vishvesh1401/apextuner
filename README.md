@@ -1,7 +1,7 @@
 # ApexTuner — AI Parameter Optimizer for Autonomous Racing
 
 ## Demo Video
-[https://drive.google.com/drive/folders/1U99Ni7Ud6NsT88F61sH371FJsDviyNdd?usp=sharing]
+[Click Here!](https://drive.google.com/drive/folders/1U99Ni7Ud6NsT88F61sH371FJsDviyNdd?usp=sharing)
 
 ## The Problem
 Tuning an autonomous racing AI is pure trial and error. You change 
