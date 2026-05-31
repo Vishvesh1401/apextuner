@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ApexTuner — Race Experiment Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --red: #e8281a;
+      --red-dim: #9c1a10;
+      --green: #3ddc84;
+      --grey: #55555d;
+      --bg: #09090c;
+      --panel: #0f0f13;
+      --panel2: #141418;
+      --border: #1c1c22;
+      --text: #e0e0e8;
+      --muted: #555560;
+      --accent: #f0432a;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', 'Courier New', Courier, monospace;
+      min-height: 100vh;
+      padding: 32px 28px 60px;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    header h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #f2f2f2;
+    }
+
+    header h1 span {
+      color: var(--red);
+    }
+
+    header p {
+      margin-top: 5px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .header-badge {
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      background: #1a0805;
+      border: 1px solid #3a100a;
+      color: var(--red);
+      padding: 5px 14px;
+      border-radius: 2px;
+    }
+
+    /* ── Hero Stats ── */
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 44px;
+    }
+
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-top: 3px solid transparent;
+      padding: 22px 24px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at top left, rgba(232, 40, 26, 0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-card.first {
+      border-top-color: #f07020;
+    }
+
+    .stat-card.human {
+      border-top-color: var(--grey);
+    }
+
+    .stat-card.ai {
+      border-top-color: var(--green);
+    }
+
+    .stat-card.delta {
+      border-top-color: var(--red);
+    }
+
+    .stat-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-card.first .stat-value {
+      color: #f07020;
+    }
+
+    .stat-card.human .stat-value {
+      color: #c0c0cc;
+    }
+
+    .stat-card.ai .stat-value {
+      color: var(--green);
+    }
+
+    .stat-card.delta .stat-value {
+      color: var(--red);
+    }
+
+    .stat-sub {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 8px;
+      letter-spacing: 0.06em;
+    }
+
+    .stat-card.first .stat-sub {
+      color: rgba(240, 112, 32, 0.6);
+    }
+
+    .stat-card.ai .stat-sub {
+      color: rgba(61, 220, 132, 0.6);
+    }
+
+    .stat-card.delta .stat-sub {
+      color: rgba(232, 40, 26, 0.5);
+    }
+
+    /* ── Section wrappers ── */
+    section {
+      margin-bottom: 52px;
+    }
+
+    .section-label {
+      font-size: 0.63rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Timeline cards ── */
+    #timeline-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: #2a2a2e var(--bg);
+    }
+
+    #timeline-scroll::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    #timeline-scroll::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    #timeline-scroll::-webkit-scrollbar-thumb {
+      background: #2a2a2e;
+      border-radius: 2px;
+    }
+
+    .exp-card {
+      flex: 0 0 auto;
+      width: 196px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-left-width: 3px;
+      padding: 16px;
+      position: relative;
+      transition: transform 0.15s;
+    }
+
+    .exp-card:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Left border states */
+    .exp-card.border-best {
+      border-left-color: var(--green);
+    }
+
+    .exp-card.border-crashed {
+      border-left-color: var(--red);
+    }
+
+    .exp-card.border-other {
+      border-left-color: var(--grey);
+    }
+
+    .exp-card .card-id {
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .exp-card .card-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.73rem;
+      margin-bottom: 6px;
+      color: #888;
+    }
+
+    .exp-card .card-row span:last-child {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .card-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 10px 0;
+    }
+
+    .lap-time {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: center;
+      margin-top: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    .lap-time.crashed {
+      color: var(--red);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .lap-time.no-time {
+      color: #383840;
+      font-size: 0.68rem;
+      font-style: italic;
+    }
+
+    .lap-time.valid {
+      color: var(--green);
+    }
+
+    .best-badge {
+      display: inline-block;
+      font-size: 0.52rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--green);
+      border: 1px solid rgba(61, 220, 132, 0.3);
+      background: rgba(61, 220, 132, 0.06);
+      padding: 2px 6px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    #timeline-empty {
+      color: #333;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      padding: 20px 0;
+    }
+
+    /* ── SVG Chart ── */
+    #section-chart .chart-wrap {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 24px 24px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #section-chart .chart-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at top right, rgba(232, 40, 26, 0.03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    #lap-chart {
+      width: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .chart-empty-msg {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      padding: 40px 0;
+      letter-spacing: 0.1em;
+    }
+
+    /* Chart tooltip */
+    #chart-tooltip {
+      position: fixed;
+      background: #13131a;
+      border: 1px solid #2a2a36;
+      border-left: 2px solid var(--red);
+      padding: 10px 14px;
+      font-size: 0.7rem;
+      color: var(--text);
+      pointer-events: none;
+      z-index: 1000;
+      display: none;
+      line-height: 1.7;
+      min-width: 150px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    #chart-tooltip .tt-title {
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 6px;
+    }
+
+    #chart-tooltip .tt-row {
+      color: #aaa;
+    }
+
+    #chart-tooltip .tt-row span {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ── Analyze section ── */
+    #btn-analyze {
+      background: none;
+      border: 1px solid var(--red);
+      color: var(--red);
+      padding: 11px 28px;
+      font-family: 'Outfit', 'Courier New', Courier, monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    }
+
+    #btn-analyze:hover:not(:disabled) {
+      background: var(--red);
+      color: #fff;
+      box-shadow: 0 0 18px rgba(232, 40, 26, 0.25);
+    }
+
+    #btn-analyze:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    #analyze-status {
+      margin-top: 14px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    #analyze-status.loading {
+      color: #888;
+      animation: blink 1s step-start infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    #analyze-result {
+      display: none;
+      margin-top: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--red);
+      padding: 18px 20px;
+      font-size: 0.78rem;
+      font-family: 'Courier New', Courier, monospace;
+      line-height: 1.75;
+      color: #bbb;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 300px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #2a2a2e var(--panel);
+    }
+
+    /* ── Next Recommended Config Card ── */
+    #recommendation-card {
+      display: none;
+      margin-top: 18px;
+      background: #0c1208;
+      border: 1px solid #1e3319;
+      border-left: 3px solid var(--green);
+      padding: 20px 22px 18px;
+      animation: fadeInUp 0.35s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .rec-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .rec-title {
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--green);
+    }
+
+    #btn-apply {
+      background: none;
+      border: 1px solid rgba(61, 220, 132, 0.4);
+      color: var(--green);
+      padding: 6px 16px;
+      font-family: 'Outfit', 'Courier New', Courier, monospace;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    #btn-apply:hover {
+      background: rgba(61, 220, 132, 0.12);
+    }
+
+    .rec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 14px;
+    }
+
+    .rec-item {
+      background: rgba(61, 220, 132, 0.04);
+      border: 1px solid rgba(61, 220, 132, 0.1);
+      padding: 12px 14px;
+    }
+
+    .rec-item-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(61, 220, 132, 0.55);
+      margin-bottom: 6px;
+    }
+
+    .rec-item-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: -0.01em;
+    }
+
+    .rec-predicted {
+      margin-top: 14px;
+      font-size: 0.7rem;
+      color: rgba(61, 220, 132, 0.6);
+      letter-spacing: 0.06em;
+    }
+
+    .rec-predicted span {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    /* ── Add Result form ── */
+    form#add-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-group label {
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .field-group input[type="number"] {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 12px;
+      font-family: 'Outfit', 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field-group input[type="number"]:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 2px rgba(232, 40, 26, 0.1);
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      align-self: flex-end;
+      padding-bottom: 2px;
+    }
+
+    .checkbox-group label {
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      accent-color: var(--red);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .form-footer {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 4px;
+    }
+
+    #btn-submit {
+      background: var(--red);
+      border: none;
+      color: #fff;
+      padding: 11px 32px;
+      font-family: 'Outfit', 'Courier New', Courier, monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.15s, box-shadow 0.15s;
+    }
+
+    #btn-submit:hover:not(:disabled) {
+      opacity: 0.88;
+      box-shadow: 0 0 18px rgba(232, 40, 26, 0.3);
+    }
+
+    #btn-submit:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    #form-status {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    #form-status.success {
+      color: var(--green);
+    }
+
+    #form-status.error {
+      color: var(--red);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      body {
+        padding: 20px 16px 40px;
+      }
+
+      .hero-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stat-value {
+        font-size: 1.9rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div>
+      <h1>Apex<span>Tuner</span></h1>
+      <p>Race Experiment Dashboard </p>
+    </div>
+    <div class="header-badge">AI-Driven Lap Optimization</div>
+  </header>
+
+  <!-- ── Hero Stats ── -->
+  <div class="hero-stats">
+    <div class="stat-card first">
+      <div class="stat-label">First Run</div>
+      <div class="stat-value" id="stat-first">62.05s</div>
+      <div class="stat-sub">Starting baseline</div>
+    </div>
+    <div class="stat-card human">
+      <div class="stat-label">Human Best</div>
+      <div class="stat-value" id="stat-human">—</div>
+      <div class="stat-sub">Hand-tuned reference</div>
+    </div>
+    <div class="stat-card ai">
+      <div class="stat-label">AI Best</div>
+      <div class="stat-value" id="stat-ai">—</div>
+      <div class="stat-sub">Current champion run</div>
+    </div>
+    <div class="stat-card delta">
+      <div class="stat-label">Total Improvement</div>
+      <div class="stat-value" id="stat-delta">—</div>
+      <div class="stat-sub" id="stat-delta-sub">first run → AI best</div>
+    </div>
+  </div>
+
+  <!-- ── Section 1: Experiment Timeline ── -->
+  <section id="section-timeline">
+    <div class="section-label">01 &mdash; Experiment Timeline</div>
+    <div id="timeline-scroll">
+      <span id="timeline-empty">Loading experiments&hellip;</span>
+    </div>
+  </section>
+
+  <!-- ── Section 2: Performance Curve ── -->
+  <section id="section-chart">
+    <div class="section-label">02 &mdash; Performance Curve</div>
+    <div class="chart-wrap">
+      <svg id="lap-chart" height="220"></svg>
+      <p id="chart-empty" class="chart-empty-msg" style="display:none;">No valid lap times to chart yet.</p>
+    </div>
+  </section>
+
+  <!-- ── Section 3: AI Analysis ── -->
+  <section id="section-analyze">
+    <div class="section-label">03 &mdash; AI Analysis</div>
+    <button id="btn-analyze">Analyze with Granite</button>
+    <div id="analyze-status"></div>
+    <pre id="analyze-result"></pre>
+
+    <!-- Next Recommended Config box -->
+    <div id="recommendation-card">
+      <div class="rec-header">
+        <div class="rec-title">&#9654; Next Recommended Config</div>
+        <button id="btn-apply">&#8594; Apply to Form</button>
+      </div>
+      <div class="rec-grid" id="rec-grid"></div>
+      <div class="rec-predicted" id="rec-predicted"></div>
+    </div>
+  </section>
+
+  <!-- ── Section 4: Add Result ── -->
+  <section id="section-add">
+    <div class="section-label">04 &mdash; Add Result</div>
+    <form id="add-form" onsubmit="return false;">
+      <div class="field-group">
+        <label for="f-target-speed">Target Speed</label>
+        <input type="number" id="f-target-speed" step="any" placeholder="e.g. 120" />
+      </div>
+      <div class="field-group">
+        <label for="f-steer-gain">Steer Gain</label>
+        <input type="number" id="f-steer-gain" step="any" placeholder="e.g. 10" />
+      </div>
+      <div class="field-group">
+        <label for="f-brake-threshold">Brake Threshold</label>
+        <input type="number" id="f-brake-threshold" step="any" placeholder="e.g. 0.5" />
+      </div>
+      <div class="field-group">
+        <label for="f-lap-time">Lap Time (s)</label>
+        <input type="number" id="f-lap-time" step="any" placeholder="60.66 or N/A" />
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="f-crashed" />
+        <label for="f-crashed">Crashed</label>
+      </div>
+      <div class="form-footer">
+        <button type="submit" id="btn-submit">Submit</button>
+        <span id="form-status"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- Floating chart tooltip -->
+  <div id="chart-tooltip">
+    <div class="tt-title" id="tt-title"></div>
+    <div class="tt-row" id="tt-speed"></div>
+    <div class="tt-row" id="tt-steer"></div>
+    <div class="tt-row" id="tt-brake"></div>
+    <div class="tt-row" id="tt-lap"></div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:8000';
+
+    /* ──────────────────────────────────────────────────────────
+       Globals
+    ────────────────────────────────────────────────────────── */
+    // These match the human's hand-tuned best (Run #6: 57.49s)
+    // and are used as the static baseline for the hero stats.
+    const HUMAN_BEST_DEFAULT = 57.49;
+
+    let _lastRecommendation = null; // stores parsed recommendation for "Apply" btn
+
+    /* ──────────────────────────────────────────────────────────
+       Hero Stats
+    ────────────────────────────────────────────────────────── */
+    function updateHeroStats(experiments) {
+      const validTimes = experiments
+        .filter(e => !e.crashed && e.lap_time != null)
+        .map(e => e.lap_time);
+
+      const aiBest = validTimes.length > 0 ? Math.min(...validTimes) : null;
+
+      // Hard-coded constants for the hackathon demo
+      const firstRunTime = 62.05;  // Run #3 — first experiment with a recorded lap time
+      const humanBest = HUMAN_BEST_DEFAULT; // 57.49s
+
+      // First Run card (static for demo clarity)
+      document.getElementById('stat-first').textContent =
+        firstRunTime.toFixed(2) + 's';
+
+      document.getElementById('stat-human').textContent =
+        humanBest.toFixed(2) + 's';
+
+      if (aiBest !== null) {
+        document.getElementById('stat-ai').textContent =
+          aiBest.toFixed(2) + 's';
+
+        // Total improvement = first run minus current AI best
+        const totalDelta = firstRunTime - aiBest;
+        const deltaEl = document.getElementById('stat-delta');
+        const deltaSubEl = document.getElementById('stat-delta-sub');
+        deltaEl.textContent = Math.abs(totalDelta).toFixed(2) + 's';
+        deltaSubEl.textContent = totalDelta >= 0 ? 'faster than first run' : 'still behind first run';
+      } else {
+        document.getElementById('stat-ai').textContent = '—';
+        document.getElementById('stat-delta').textContent = '—';
+      }
+    }
+
+    /* ──────────────────────────────────────────────────────────
+       SVG Line Chart
+    ────────────────────────────────────────────────────────── */
+    function renderChart(experiments) {
+      const svg = document.getElementById('lap-chart');
+      const emptyMsg = document.getElementById('chart-empty');
+      svg.innerHTML = '';
+
+      const valid = experiments
+        .filter(e => !e.crashed && e.lap_time != null)
+        .sort((a, b) => a.id - b.id);
+
+      if (valid.length < 2) {
+        emptyMsg.style.display = 'block';
+        svg.style.display = 'none';
+        return;
+      }
+      emptyMsg.style.display = 'none';
+      svg.style.display = 'block';
+
+      const W = svg.parentElement.clientWidth - 48;
+      const H = 200;
+      const PAD = { top: 16, right: 20, bottom: 44, left: 54 };
+      const iW = W - PAD.left - PAD.right;
+      const iH = H - PAD.top - PAD.bottom;
+
+      svg.setAttribute('width', W);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+      const ns = 'http://www.w3.org/2000/svg';
+
+      const times = valid.map(e => e.lap_time);
+      const minT = Math.min(...times);
+      const maxT = Math.max(...times);
+      const tRange = maxT - minT || 1;
+
+      const xOf = i => PAD.left + (i / (valid.length - 1)) * iW;
+      const yOf = t => PAD.top + (1 - (t - minT) / tRange) * iH;
+
+      // ── Grid lines ──
+      const gridCount = 4;
+      for (let i = 0; i <= gridCount; i++) {
+        const y = PAD.top + (i / gridCount) * iH;
+        const tVal = maxT - (i / gridCount) * tRange;
+
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', PAD.left);
+        line.setAttribute('x2', PAD.left + iW);
+        line.setAttribute('y1', y);
+        line.setAttribute('y2', y);
+        line.setAttribute('stroke', '#1c1c22');
+        line.setAttribute('stroke-width', '1');
+        svg.appendChild(line);
+
+        const label = document.createElementNS(ns, 'text');
+        label.setAttribute('x', PAD.left - 8);
+        label.setAttribute('y', y + 4);
+        label.setAttribute('text-anchor', 'end');
+        label.setAttribute('font-size', '10');
+        label.setAttribute('fill', '#888');
+        label.setAttribute('font-family', 'Courier New, monospace');
+        label.textContent = tVal.toFixed(1) + 's';
+        svg.appendChild(label);
+      }
+
+      // ── X-axis labels ──
+      valid.forEach((exp, i) => {
+        const x = xOf(i);
+        const label = document.createElementNS(ns, 'text');
+        label.setAttribute('x', x);
+        label.setAttribute('y', PAD.top + iH + 20);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('font-size', '10');
+        label.setAttribute('fill', '#888');
+        label.setAttribute('font-family', 'Courier New, monospace');
+        label.textContent = '#' + exp.id;
+        svg.appendChild(label);
+      });
+
+      // ── Build polyline points ──
+      const points = valid.map((e, i) => `${xOf(i)},${yOf(e.lap_time)}`).join(' ');
+      const firstX = xOf(0);
+      const lastX = xOf(valid.length - 1);
+      const baseY = PAD.top + iH;
+
+      // Gradient fill definition
+      const defs = document.createElementNS(ns, 'defs');
+
+      const grad = document.createElementNS(ns, 'linearGradient');
+      grad.setAttribute('id', 'chartFill');
+      grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0');
+      grad.setAttribute('x2', '0'); grad.setAttribute('y2', '1');
+      const s1 = document.createElementNS(ns, 'stop');
+      s1.setAttribute('offset', '0%');
+      s1.setAttribute('stop-color', '#e8281a');
+      s1.setAttribute('stop-opacity', '0.18');
+      const s2 = document.createElementNS(ns, 'stop');
+      s2.setAttribute('offset', '100%');
+      s2.setAttribute('stop-color', '#e8281a');
+      s2.setAttribute('stop-opacity', '0');
+      grad.appendChild(s1);
+      grad.appendChild(s2);
+
+      const glowFilt = document.createElementNS(ns, 'filter');
+      glowFilt.setAttribute('id', 'glow');
+      const fBlur = document.createElementNS(ns, 'feGaussianBlur');
+      fBlur.setAttribute('stdDeviation', '2.5');
+      fBlur.setAttribute('result', 'coloredBlur');
+      const fMerge = document.createElementNS(ns, 'feMerge');
+      const fMN1 = document.createElementNS(ns, 'feMergeNode');
+      fMN1.setAttribute('in', 'coloredBlur');
+      const fMN2 = document.createElementNS(ns, 'feMergeNode');
+      fMN2.setAttribute('in', 'SourceGraphic');
+      fMerge.appendChild(fMN1);
+      fMerge.appendChild(fMN2);
+      glowFilt.appendChild(fBlur);
+      glowFilt.appendChild(fMerge);
+
+      defs.appendChild(grad);
+      defs.appendChild(glowFilt);
+      svg.appendChild(defs);
+
+      // Area fill
+      const area = document.createElementNS(ns, 'polygon');
+      area.setAttribute('points',
+        `${firstX},${baseY} ${points} ${lastX},${baseY}`);
+      area.setAttribute('fill', 'url(#chartFill)');
+      svg.appendChild(area);
+
+      // Main line
+      const polyline = document.createElementNS(ns, 'polyline');
+      polyline.setAttribute('points', points);
+      polyline.setAttribute('fill', 'none');
+      polyline.setAttribute('stroke', '#e8281a');
+      polyline.setAttribute('stroke-width', '2');
+      polyline.setAttribute('stroke-linejoin', 'round');
+      polyline.setAttribute('filter', 'url(#glow)');
+      svg.appendChild(polyline);
+
+      // ── Data points & hover ──
+      const tooltip = document.getElementById('chart-tooltip');
+      valid.forEach((exp, i) => {
+        const cx = xOf(i);
+        const cy = yOf(exp.lap_time);
+        const isBest = exp.lap_time === Math.min(...times);
+
+        const outerCircle = document.createElementNS(ns, 'circle');
+        outerCircle.setAttribute('cx', cx);
+        outerCircle.setAttribute('cy', cy);
+        outerCircle.setAttribute('r', isBest ? '11' : '10');
+        outerCircle.setAttribute('fill', 'rgba(232,40,26,0.12)');
+        outerCircle.setAttribute('stroke', 'none');
+        svg.appendChild(outerCircle);
+
+        const circle = document.createElementNS(ns, 'circle');
+        circle.setAttribute('cx', cx);
+        circle.setAttribute('cy', cy);
+        circle.setAttribute('r', isBest ? '7' : '6');
+        circle.setAttribute('fill', isBest ? '#3ddc84' : '#e8281a');
+        circle.setAttribute('stroke', '#ffffff');
+        circle.setAttribute('stroke-width', '2');
+        circle.setAttribute('filter', 'url(#glow)');
+        circle.style.cursor = 'crosshair';
+        svg.appendChild(circle);
+
+        circle.addEventListener('mouseenter', (ev) => {
+          document.getElementById('tt-title').textContent = 'Run #' + exp.id + (isBest ? ' ★ BEST' : '');
+          document.getElementById('tt-speed').innerHTML = 'Speed <span>' + exp.target_speed + ' km/h</span>';
+          document.getElementById('tt-steer').innerHTML = 'Steer gain <span>' + exp.steer_gain + '</span>';
+          document.getElementById('tt-brake').innerHTML = 'Brake thresh <span>' + exp.brake_threshold + '</span>';
+          document.getElementById('tt-lap').innerHTML = 'Lap time <span>' + Number(exp.lap_time).toFixed(3) + ' s</span>';
+          tooltip.style.display = 'block';
+          positionTooltip(ev);
+        });
+        circle.addEventListener('mousemove', positionTooltip);
+        circle.addEventListener('mouseleave', () => {
+          tooltip.style.display = 'none';
+        });
+      });
+    }
+
+    function positionTooltip(ev) {
+      const tt = document.getElementById('chart-tooltip');
+      const x = ev.clientX + 16;
+      const y = ev.clientY - 10;
+      const overflow = x + 170 > window.innerWidth;
+      tt.style.left = (overflow ? ev.clientX - 170 : x) + 'px';
+      tt.style.top = y + 'px';
+    }
+
+
+    /* ──────────────────────────────────────────────────────────
+       Section 1 — Experiment Timeline
+    ────────────────────────────────────────────────────────── */
+    async function loadExperiments() {
+      const container = document.getElementById('timeline-scroll');
+      const empty = document.getElementById('timeline-empty');
+
+      try {
+        const res = await fetch(`${API}/experiments`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const experiments = data.experiments || data;
+
+        if (!experiments || experiments.length === 0) {
+          container.innerHTML = '<span id="timeline-empty" style="color:#333;font-size:0.8rem;letter-spacing:0.1em;padding:20px 0;">No experiments recorded yet.</span>';
+          return;
+        }
+
+        // Find best lap time
+        const validTimes = experiments
+          .filter(e => !e.crashed && e.lap_time != null)
+          .map(e => e.lap_time);
+        const bestTime = validTimes.length > 0 ? Math.min(...validTimes) : null;
+
+        // Clear and rebuild
+        container.innerHTML = '';
+
+        experiments.forEach(exp => {
+          const card = document.createElement('div');
+          card.className = 'exp-card';
+
+          // Left border color
+          if (exp.crashed) {
+            card.classList.add('border-crashed');
+          } else if (bestTime !== null && exp.lap_time === bestTime) {
+            card.classList.add('border-best');
+          } else {
+            card.classList.add('border-other');
+          }
+
+          let lapHtml;
+          if (exp.crashed) {
+            lapHtml = '<div class="lap-time crashed">&#9888; Crashed</div>';
+          } else if (exp.lap_time === null || exp.lap_time === undefined) {
+            lapHtml = '<div class="lap-time no-time">no time recorded</div>';
+          } else {
+            const isBest = exp.lap_time === bestTime;
+            lapHtml = `<div class="lap-time valid">${Number(exp.lap_time).toFixed(3)} s${isBest ? '<span class="best-badge">Best</span>' : ''}</div>`;
+          }
+
+          card.innerHTML = `
+            <div class="card-id">Run #${exp.id}</div>
+            <div class="card-row"><span>Speed</span><span>${exp.target_speed}</span></div>
+            <div class="card-row"><span>Steer</span><span>${exp.steer_gain}</span></div>
+            <div class="card-row"><span>Brake</span><span>${exp.brake_threshold}</span></div>
+            <div class="card-divider"></div>
+            ${lapHtml}
+          `;
+          container.appendChild(card);
+        });
+
+        // Update hero stats and chart
+        updateHeroStats(experiments);
+        renderChart(experiments);
+
+      } catch (err) {
+        container.innerHTML = `<span style="color:#e8281a;font-size:0.75rem;letter-spacing:0.08em;">Error: ${err.message}</span>`;
+      }
+    }
+
+    /* ──────────────────────────────────────────────────────────
+       AI Recommendation Parser
+    ────────────────────────────────────────────────────────── */
+    function parseAIRecommendation(text) {
+      // Try to extract numbers after keywords
+      const extract = (patterns) => {
+        for (const pattern of patterns) {
+          const m = text.match(pattern);
+          if (m) {
+            const n = parseFloat(m[1]);
+            if (!isNaN(n)) return n;
+          }
+        }
+        return null;
+      };
+
+      const targetSpeed = extract([
+        /target[_\s-]*speed[^0-9]*([0-9]+(?:\.[0-9]+)?)/i,
+        /\b1[.]\s*[Rr]ecommended\s+target[_\s-]*speed[^0-9]*([0-9]+(?:\.[0-9]+)?)/i,
+        /speed[^0-9:]*:?\s*([0-9]+(?:\.[0-9]+)?)/i,
+      ]);
+      const steerGain = extract([
+        /steer[_\s-]*gain[^0-9]*([0-9]+(?:\.[0-9]+)?)/i,
+        /\b2[.]\s*[Rr]ecommended\s+steer[_\s-]*gain[^0-9]*([0-9]+(?:\.[0-9]+)?)/i,
+        /steer[^0-9:]*:?\s*([0-9]+(?:\.[0-9]+)?)/i,
+      ]);
+      const brakeThreshold = extract([
+        /brake[_\s-]*threshold[^0-9]*([0-9]+(?:\.[0-9]+)?)/i,
+        /\b3[.]\s*[Rr]ecommended\s+brake[_\s-]*threshold[^0-9]*([0-9]+(?:\.[0-9]+)?)/i,
+        /brake[^0-9:]*:?\s*([0-9]+(?:\.[0-9]+)?)/i,
+      ]);
+      const predictedLap = extract([
+        /predicted[_\s-]*lap[_\s-]*time[^0-9]*([0-9]+(?:\.[0-9]+)?)/i,
+        /\b4[.]\s*[Pp]redicted[^0-9]*([0-9]+(?:\.[0-9]+)?)/i,
+        /predict[^0-9]*([0-9]+(?:\.[0-9]+)?)/i,
+      ]);
+
+      if (targetSpeed == null && steerGain == null && brakeThreshold == null) return null;
+
+      return { targetSpeed, steerGain, brakeThreshold, predictedLap };
+    }
+
+    function showRecommendationCard(rec) {
+      _lastRecommendation = rec;
+      const card = document.getElementById('recommendation-card');
+      const grid = document.getElementById('rec-grid');
+      const predEl = document.getElementById('rec-predicted');
+
+      const params = [
+        { label: 'Target Speed', value: rec.targetSpeed, unit: 'km/h' },
+        { label: 'Steer Gain', value: rec.steerGain, unit: '' },
+        { label: 'Brake Threshold', value: rec.brakeThreshold, unit: '' },
+      ];
+
+      grid.innerHTML = params.map(p => `
+        <div class="rec-item">
+          <div class="rec-item-label">${p.label}</div>
+          <div class="rec-item-value">${p.value != null ? p.value + (p.unit ? ' ' + p.unit : '') : '—'}</div>
+        </div>
+      `).join('');
+
+      predEl.innerHTML = rec.predictedLap != null
+        ? `Predicted lap time: <span>${rec.predictedLap.toFixed(2)} s</span>`
+        : '';
+
+      card.style.display = 'block';
+    }
+
+    /* ──────────────────────────────────────────────────────────
+       Section 2 — AI Analysis
+    ────────────────────────────────────────────────────────── */
+    document.getElementById('btn-analyze').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-analyze');
+      const status = document.getElementById('analyze-status');
+      const result = document.getElementById('analyze-result');
+      const recCard = document.getElementById('recommendation-card');
+
+      btn.disabled = true;
+      result.style.display = 'none';
+      result.textContent = '';
+      recCard.style.display = 'none';
+      status.textContent = 'Analyzing runs with Granite\u2026';
+      status.className = 'loading';
+
+      try {
+        const res = await fetch(`${API}/analyze`, { method: 'POST' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        const text = typeof data === 'string'
+          ? data
+          : (data.analysis || data.result || data.response || JSON.stringify(data, null, 2));
+
+        status.textContent = '';
+        status.className = '';
+        result.textContent = text;
+        result.style.display = 'block';
+
+        // Parse and show recommended config
+        const rec = parseAIRecommendation(text);
+        if (rec) showRecommendationCard(rec);
+
+      } catch (err) {
+        status.textContent = `Failed: ${err.message}`;
+        status.className = '';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    /* ──────────────────────────────────────────────────────────
+       "Apply to Form" button
+    ────────────────────────────────────────────────────────── */
+    document.getElementById('btn-apply').addEventListener('click', () => {
+      if (!_lastRecommendation) return;
+      const r = _lastRecommendation;
+      if (r.targetSpeed != null) document.getElementById('f-target-speed').value = r.targetSpeed;
+      if (r.steerGain != null) document.getElementById('f-steer-gain').value = r.steerGain;
+      if (r.brakeThreshold != null) document.getElementById('f-brake-threshold').value = r.brakeThreshold;
+      document.getElementById('f-lap-time').value = '';
+      document.getElementById('f-crashed').checked = false;
+      document.getElementById('section-add').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    /* ──────────────────────────────────────────────────────────
+       Section 4 — Add Result
+    ────────────────────────────────────────────────────────── */
+    document.getElementById('btn-submit').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-submit');
+      const status = document.getElementById('form-status');
+
+      const targetSpeed = document.getElementById('f-target-speed').value;
+      const steerGain = document.getElementById('f-steer-gain').value;
+      const brakeThreshold = document.getElementById('f-brake-threshold').value;
+      const lapTimeVal = document.getElementById('f-lap-time').value;
+      const crashed = document.getElementById('f-crashed').checked;
+
+      if (targetSpeed === '' || steerGain === '' || brakeThreshold === '') {
+        status.textContent = 'target_speed, steer_gain and brake_threshold are required.';
+        status.className = 'error';
+        return;
+      }
+
+      const payload = {
+        target_speed: parseFloat(targetSpeed),
+        steer_gain: parseFloat(steerGain),
+        brake_threshold: parseFloat(brakeThreshold),
+        lap_time: lapTimeVal !== '' ? parseFloat(lapTimeVal) : null,
+        crashed: crashed,
+      };
+
+      btn.disabled = true;
+      status.textContent = 'Submitting\u2026';
+      status.className = '';
+
+      try {
+        const res = await fetch(`${API}/add-experiment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status}: ${errText}`);
+        }
+
+        status.textContent = 'Experiment added.';
+        status.className = 'success';
+
+        // Clear form
+        document.getElementById('f-target-speed').value = '';
+        document.getElementById('f-steer-gain').value = '';
+        document.getElementById('f-brake-threshold').value = '';
+        document.getElementById('f-lap-time').value = '';
+        document.getElementById('f-crashed').checked = false;
+
+        // Refresh timeline and chart
+        await loadExperiments();
+
+      } catch (err) {
+        status.textContent = `Error: ${err.message}`;
+        status.className = 'error';
+      } finally {
+        btn.disabled = false;
+        setTimeout(() => {
+          if (status.className === 'success') {
+            status.textContent = '';
+            status.className = '';
+          }
+        }, 3000);
+      }
+    });
+
+    /* ──────────────────────────────────────────────────────────
+       Init
+    ────────────────────────────────────────────────────────── */
+    loadExperiments();
+
+    // Redraw chart on window resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => loadExperiments(), 200);
+    });
+  </script>
+</body>
+
+</html>

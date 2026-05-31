@@ -1,0 +1,75 @@
+{
+  "experiments": [
+    {
+      "id": 1,
+      "target_speed": 100,
+      "steer_gain": 30,
+      "brake_threshold": 0.9,
+      "lap_time": null,
+      "crashed": false
+    },
+    {
+      "id": 2,
+      "target_speed": 70,
+      "steer_gain": 30,
+      "brake_threshold": 0.9,
+      "lap_time": null,
+      "crashed": false
+    },
+    {
+      "id": 3,
+      "target_speed": 120,
+      "steer_gain": 15,
+      "brake_threshold": 0.9,
+      "lap_time": 62.05,
+      "crashed": false
+    },
+    {
+      "id": 4,
+      "target_speed": 120,
+      "steer_gain": 15,
+      "brake_threshold": 0.4,
+      "lap_time": 67.0,
+      "crashed": false
+    },
+    {
+      "id": 5,
+      "target_speed": 150,
+      "steer_gain": 12,
+      "brake_threshold": 0.6,
+      "lap_time": null,
+      "crashed": true
+    },
+    {
+      "id": 6,
+      "target_speed": 130,
+      "steer_gain": 12,
+      "brake_threshold": 0.5,
+      "lap_time": 57.49,
+      "crashed": false
+    },
+    {
+      "id": 7,
+      "target_speed": 140,
+      "steer_gain": 10,
+      "brake_threshold": 0.6,
+      "lap_time": 53.56,
+      "crashed": false
+    },
+    {
+      "target_speed": 140,
+      "steer_gain": 8,
+      "brake_threshold": 0.5,
+      "lap_time": 53.52,
+      "crashed": false,
+      "id": 8
+    }
+  ],
+  "ai_recommendation": {
+    "target_speed": 135,
+    "steer_gain": 10,
+    "brake_threshold": 0.7,
+    "predicted_lap_time": 54.0,
+    "reasoning": "Moderate speed increase with reduced steer sensitivity for stability"
+  }
+}
